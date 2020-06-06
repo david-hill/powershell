@@ -8,7 +8,11 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
     $e=$_.FullName -replace "flac$", "mp3"
     $f=$_.FullName -replace "flac$", "wav"
     if (Test-Path -LiteralPath "$e") {
+      write-host "$e"
       $mediad = [taglib.file]::create($e)
+      if (Test-Path -LiteralPath "$f") {
+        Remove-Item "$f"
+      }
       if ($media.tag.album -eq $null) {
         $media = [taglib.file]::create($_.FullName)
         $filetitle = $media.tag.title
@@ -37,7 +41,6 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
         $media.tag.BeatsPerMinute = [string]$filebpm
         $media.tag.pictures = $pic
         $media.save()
-        Remove-Item "$f"
       } else {
         write-host $media.tag.album
       }
