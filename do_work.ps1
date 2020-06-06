@@ -3,7 +3,28 @@ $a = Get-ChildItem d:\soulseek-downloads\complete -recurse | Where-Object {$_.PS
 $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
   if ( $_.FullName -like '*mp3') {
   } elseif ( $_.FullName -like '*m4a' -or $_.FullName -like '*wma' -or $_.FullName -like '*mp2') {
-  } elseif ($_.FullName -like '*wav' -or $_.FullName -like '*flac' -or $_.FullName -like '*cue' -or $_.FullName -like '*ape') {
+  } elseif ( $_.FullName -like '*cue' ) {
+  } elseif ( $_.FullName -like '*wav' ) {
+    $d=$_.FullName -replace "wav$", "mp3"
+    if (-Not (Test-Path -LiteralPath $d)) {
+      & 'C:\Program Files (x86)\Lame\lame.exe' $_.FullName $d -b 320
+    }
+  } elseif ( $_.FullName -like '*ape') {
+    $d=$_.FullName -replace "ape$", "wav"
+    $e=$_.FullName -replace "ape$", "mp3"
+    if (-not (Test-Path -LiteralPath "$e")) {
+      & "C:\Program Files (x86)\Monkey's Audio\MAC.exe" $_.FullName $d -d
+      & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
+      Remove-Item $d
+    }
+  } elseif ( $_.FullName -like '*flac' ) {
+    $d=$_.FullName -replace "flac$", "wav"
+    $e=$_.FullName -replace "flac$", "mp3"
+    if (-not (Test-Path -LiteralPath "$e")) {
+      & 'd:\tools\flac.exe' -d $_.FullName -F
+      & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
+      Remove-Item $d
+    }
   } elseif ($_.FullName -like '*rar' -or $_.FullName -like '*zip') {
   } ElseIf ($_.FullName -like '*avi' -or $_.FullName -like '*mov' -or $_.FullName -like '*mpeg' -or $_.FullName -like '*mpg' -or $_.FullName -like '*wmv' -or $_.FullName -like '*flv') {
   } else {
@@ -19,38 +40,4 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
 }
 
 $a | Where-Object {$_.GetFiles().Count -eq 0 -and $_.GetDirectories().count -eq 0} | Remove-Item
-
 $a = Get-ChildItem d:\soulseek-downloads\complete -recurse | Where-Object {$_.PSIsContainer -eq $True}
-
-$a | Where-Object {$_.GetFiles("*.flac").Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem  | ForEach-Object {
-  if ($_.FullName -like '*flac') {
-    $d=$_.FullName -replace "flac$", "wav"
-    $e=$_.FullName -replace "flac$", "mp3"
-    if (-not (Test-Path -LiteralPath "$e")) {
-      & 'd:\tools\flac.exe' -d $_.FullName -F
-      & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-      Remove-Item $d
-    }
-  }
-}         
-
-$a | Where-Object {$_.GetFiles("*.ape").Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem  | ForEach-Object {
-  if ($_.FullName -like '*ape') {
-    $d=$_.FullName -replace "ape$", "wav"
-    $e=$_.FullName -replace "ape$", "mp3"
-    if (-not (Test-Path -LiteralPath "$e")) {
-      & "C:\Program Files (x86)\Monkey's Audio\MAC.exe" $_.FullName $d -d
-      & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-      Remove-Item $d
-    }
-  }
-}     
-
-$a | Where-Object {$_.GetFiles("*.wav").Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem  | ForEach-Object {
-  if ($_.FullName -like '*wav') {
-    $d=$_.FullName -replace "wav$", "mp3"
-    if (-Not (Test-Path -LiteralPath $d)) {
-      & 'C:\Program Files (x86)\Lame\lame.exe' $_.FullName $d -b 320
-    }
-  }
-}
