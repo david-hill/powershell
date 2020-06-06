@@ -6,6 +6,7 @@ $a = Get-ChildItem d:\soulseek-downloads\complete -recurse | Where-Object {$_.PS
 $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
   if ($_.FullName -like '*flac') {
     $e=$_.FullName -replace "flac$", "mp3"
+    $f=$_.FullName -replace "flac$", "wav"
     if (Test-Path -LiteralPath "$e") {
       $mediad = [taglib.file]::create($e)
       if ($media.tag.album -eq $null) {
@@ -36,6 +37,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
         $media.tag.BeatsPerMinute = [string]$filebpm
         $media.tag.pictures = $pic
         $media.save()
+        Remove-Item "$f"
       } else {
         write-host $media.tag.album
       }
