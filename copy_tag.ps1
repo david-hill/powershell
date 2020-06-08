@@ -13,7 +13,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
       if (Test-Path -LiteralPath "$f") {
         Remove-Item "$f"
       }
-      if ($media.tag.album -eq $null) {
+      if ($mediad.tag.album -eq $null) {
         $media = [taglib.file]::create($_.FullName)
         $filetitle = $media.tag.title
         $fileperformers = $media.tag.performers
@@ -28,19 +28,19 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
         $filecomposers = $media.tag.Composers
         $fileBPM = $media.tag.BeatsPerMinute
         $pic = $media.tag.pictures
-        $media.tag.title = [string]$filetitle
-        $media.tag.performers = [string]$fileperformers
-        $media.tag.albumartists = [string]$filealbumartists
-        $media.tag.album = [string]$filealbum
-        $media.tag.genres = [string]$filegenres
-        $media.tag.year = $fileyear
-        $media.tag.track = [string]$filetrack
-        $media.tag.trackcount = [string]$filetrackcount
-        $media.tag.conductor = [string]$fileconductor
-        $media.tag.composers = [string]$filecomposers
-        $media.tag.BeatsPerMinute = [string]$filebpm
-        $media.tag.pictures = $pic
-        $media.save()
+        $mediad.tag.title = [string]$filetitle
+        $mediad.tag.performers = [string]$fileperformers
+        $mediad.tag.albumartists = [string]$filealbumartists
+        $mediad.tag.album = [string]$filealbum
+        $mediad.tag.genres = [string]$filegenres
+        $mediad.tag.year = $fileyear
+        $mediad.tag.track = [string]$filetrack
+        $mediad.tag.trackcount = [string]$filetrackcount
+        $mediad.tag.conductor = [string]$fileconductor
+        $mediad.tag.composers = [string]$filecomposers
+        $mediad.tag.BeatsPerMinute = [string]$filebpm
+        $mediad.tag.pictures = $pic
+        $mediad.save()
       } else {
         write-host $media.tag.album
       }
