@@ -15,7 +15,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
     if (-not (Test-Path -LiteralPath "$e")) {
       & "C:\Program Files (x86)\Monkey's Audio\MAC.exe" $_.FullName $d -d
       & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-      Remove-Item $d
+      Remove-Item -LiteralPath $d
     }
   } elseif ( $_.FullName -like '*flac' ) {
     $d=$_.FullName -replace "flac$", "wav"
@@ -23,7 +23,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
     if (-not (Test-Path -LiteralPath "$e")) {
       & 'd:\tools\flac.exe' -d $_.FullName -F
       & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-      Remove-Item $d
+      Remove-Item -LiteralPath $d
     }
   } elseif ($_.FullName -like '*rar' -or $_.FullName -like '*zip') {
   } ElseIf ($_.FullName -like '*avi' -or $_.FullName -like '*mov' -or $_.FullName -like '*mpeg' -or $_.FullName -like '*mpg' -or $_.FullName -like '*wmv' -or $_.FullName -like '*flv') {
