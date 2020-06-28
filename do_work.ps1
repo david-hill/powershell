@@ -1,4 +1,57 @@
+$taglib = "d:\tools\taglib-sharp.dll"
+[system.reflection.assembly]::loadfile($taglib)
+
+function copy_tag {
+  $oformat=$args[0]
+  $fullname=$args[1]
+  if ($fullname -like "*$oformat") {
+    $e=$fullname -replace "$oformat$", "mp3"
+    $f=$fullname -replace "$oformat$", "wav"
+    if (Test-Path -LiteralPath "$e") {
+      $mediad = [taglib.file]::create($e)
+      if (Test-Path -LiteralPath "$f" ) {
+        if (-not($fullname -like '*.wav')) {
+          write-host "Deleting $f"
+          Remove-item -LiteralPath "$f"
+        }
+      }
+      if ($mediad.tag.album -eq $null) {
+        write-host "Sync tags for $e"
+        $media = [taglib.file]::create($_.FullName)
+        $filetitle = $media.tag.title
+        $fileperformers = $media.tag.performers
+        $filealbumartists = $media.tag.albumartists
+        $filealbum = $media.tag.album
+        $filegenres = $media.tag.genres
+        $fileyear = $media.tag.year
+        $filetrack = $media.tag.track
+        $filetrackcount = $media.tag.trackcount
+        $fileaudiobitrate = $media.properties.audiobitrate
+        $fileconductor = $media.tag.conductor
+        $filecomposers = $media.tag.Composers
+        $fileBPM = $media.tag.BeatsPerMinute
+        $pic = $media.tag.pictures
+        $mediad.tag.title = [string]$filetitle
+        $mediad.tag.performers = [string]$fileperformers
+        $mediad.tag.albumartists = [string]$filealbumartists
+        $mediad.tag.album = [string]$filealbum
+        $mediad.tag.genres = [string]$filegenres
+        $mediad.tag.year = $fileyear
+        $mediad.tag.track = [string]$filetrack
+        $mediad.tag.trackcount = [string]$filetrackcount
+        $mediad.tag.conductor = [string]$fileconductor
+        $mediad.tag.composers = [string]$filecomposers
+        $mediad.tag.BeatsPerMinute = [string]$filebpm
+        $mediad.tag.pictures = $pic
+        $mediad.save()
+      }
+    }
+  }
+}
+
 $a = Get-ChildItem d:\soulseek-downloads\complete -recurse | Where-Object {$_.PSIsContainer -eq $True}
+#$a = Get-ChildItem n:\mp3 -recurse | Where-Object {$_.PSIsContainer -eq $True}
+
 
 $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
   if ( $_.FullName -like '*mp3') {
@@ -9,6 +62,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
     if (-Not (Test-Path -LiteralPath $d)) {
       & 'C:\Program Files (x86)\Lame\lame.exe' $_.FullName $d -b 320
     }
+    copy_tag wav $_.FullName
   } elseif ( $_.FullName -like '*ape') {
     $d=$_.FullName -replace "ape$", "wav"
     $e=$_.FullName -replace "ape$", "mp3"
@@ -17,6 +71,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
       & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
       Remove-Item -LiteralPath $d
     }
+    copy_tag ape $_.FullName
   } elseif ( $_.FullName -like '*flac' ) {
     $d=$_.FullName -replace "flac$", "wav"
     $e=$_.FullName -replace "flac$", "mp3"
@@ -25,6 +80,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
       & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
       Remove-Item -LiteralPath $d
     }
+    copy_tag flac $_.FullName
   } elseif ($_.FullName -like '*rar' -or $_.FullName -like '*zip') {
   } ElseIf ($_.FullName -like '*avi' -or $_.FullName -like '*mov' -or $_.FullName -like '*mpeg' -or $_.FullName -like '*mpg' -or $_.FullName -like '*wmv' -or $_.FullName -like '*flv') {
   } else {
@@ -39,5 +95,6 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
   }
 }
 
-$a | Where-Object {$_.GetFiles().Count -eq 0 -and $_.GetDirectories().count -eq 0} | Remove-Item
 $a = Get-ChildItem d:\soulseek-downloads\complete -recurse | Where-Object {$_.PSIsContainer -eq $True}
+
+$a | Where-Object {$_.GetFiles().Count -eq 0 -and $_.GetDirectories().count -eq 0} | Remove-Item
