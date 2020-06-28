@@ -28,11 +28,11 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
         $artist=find_artist $_
         if (-not ( $artist -eq $False) ) {
           write-host $artist
-          if ($artist -like $find_artist) {
+          if ($artist -like "*$find_artist*" ) {
             if (-not(Test-Path -LiteralPath "$basepath\$find_artist") ) {
-              write-host New-Item -Path "$basepath" -Name "$find_artist" -ItemType "directory"
+              New-Item -Path "$basepath" -Name "$find_artist" -ItemType "directory"
             }
-              write-host             move-item -path "$dir" -destination "$basepath\$find_artist" -Force
+              move-item -path "$dir" -destination "$basepath\$find_artist" -Force
           }
         }
       }
