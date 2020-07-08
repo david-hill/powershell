@@ -15,25 +15,22 @@ function find_artist {
   }
 }
 
-$find_artist="Cisfinitum"
 $basepath="d:\soulseek-downloads\complete"
 $a = Get-ChildItem $basepath -recurse | Where-Object {$_.PSIsContainer -eq $True}
 
 $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
   if ( $_.FullName -like '*mp3' -or $_.FullName -like '*flac' -or $_.FullName -like '*m4a' -or $_.FullName -like '*wav') {
     if (Test-Path -LiteralPath $_.FullName)  {
-      $dir=Split-Path -Path $_.FullName -Parent
-      if ( -not ( "$dir" -like "$basepath\$find_artist\*" ) ) {
-        write-host "dir" $dir
-        $artist=find_artist $_
-        if (-not ( $artist -eq $False) ) {
+      $artist=find_artist $_
+      if (-not ( $artist -eq $False) ) {
+	    $dir=Split-Path -Path $_.FullName -Parent
+        if ( -not ( "$dir" -like "$basepath\$artist\*" ) -and -not ("$dir" -like "$basepath\$artist") ) {
+          write-host "dir" $dir
           write-host $artist
-          if ($artist -like "*$find_artist*" ) {
-            if (-not(Test-Path -LiteralPath "$basepath\$find_artist") ) {
-              New-Item -Path "$basepath" -Name "$find_artist" -ItemType "directory"
-            }
-              move-item -path "$dir" -destination "$basepath\$find_artist" -Force
+          if (-not(Test-Path -LiteralPath "$basepath\$artist") ) {
+            write-host New-Item -Path "$basepath" -Name "$artist" -ItemType "directory"
           }
+          write-host move-item -path "$dir" -destination "$basepath\$artist" -Force
         }
       }
     }
