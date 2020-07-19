@@ -30,7 +30,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
           if (-not(Test-Path -LiteralPath "$basepath\$artist") ) {
             write-host New-Item -Path "$basepath" -Name "$artist" -ItemType "directory"
           }
-          write-host move-item -path "$dir" -destination "$basepath\$artist" -Force
+          write-host move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
         }
       }
     }
