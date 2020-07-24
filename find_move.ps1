@@ -15,7 +15,7 @@ function find_artist {
   }
 }
 
-$basepath="D:\soulseek-downloads\complete\Dina Carroll"
+$basepath="D:\soulseek-downloads\complete\"
 $a = Get-ChildItem $basepath -recurse | Where-Object {$_.PSIsContainer -eq $True}
 
 $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
