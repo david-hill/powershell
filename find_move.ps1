@@ -23,7 +23,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
     if (Test-Path -LiteralPath $_.FullName)  {
       $artist=find_artist $_
       if (-not ( $artist -eq $False) ) {
-	    $dir=Split-Path -Path $_.FullName -Parent
+	$dir=Split-Path -Path $_.FullName -Parent
         if ( -not ( "$dir" -like "$basepath\$artist\*" ) -and -not ("$dir" -like "$basepath\$artist") ) {
           write-host "dir" $dir
           write-host $artist
