@@ -6,16 +6,16 @@ function find_artist {
   $media = [taglib.file]::create($_.FullName)
   $fileperformers = $media.tag.performers
   $filealbumartists = $media.tag.albumartists
-  if (-not ( $fileperformers -eq $null) ) {
+  if (-not ( $fileperformers -eq $null) -and [string]::IsNullOrEmpty($fileperformers) -eq $False ) {
     return $fileperformers
-  } elseif ( -not ( $filealbumartists -eq $null ) ) {
+  } elseif ( -not ( $filealbumartists -eq $null )  -and [string]::IsNullOrEmpty($filealbumartists) -eq $False ) {
     return $filealbumartists
   } else {
     return $False
   }
 }
 
-$basepath="d:\soulseek-downloads\complete"
+$basepath="D:\soulseek-downloads\complete\Dina Carroll"
 $a = Get-ChildItem $basepath -recurse | Where-Object {$_.PSIsContainer -eq $True}
 
 $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
@@ -28,9 +28,9 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
           write-host "dir" $dir
           write-host $artist
           if (-not(Test-Path -LiteralPath "$basepath\$artist") ) {
-            write-host New-Item -Path "$basepath" -Name "$artist" -ItemType "directory"
+            New-Item -Path "$basepath" -Name "$artist" -ItemType "directory"
           }
-          write-host move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
+          move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
         }
       }
     }
