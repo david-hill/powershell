@@ -33,7 +33,14 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
             if (-not(Test-Path -LiteralPath "$basepath\$artist") ) {
               New-Item -Path "$basepath" -Name "$artist" -ItemType "directory"
             }
-            move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
+            $media = [taglib.file]::create($_.FullName)
+            $filealbum = $media.tag.album
+            $fileyear = $media.tag.year
+            if ( (-not [string]::IsNullOrEmpty($filealbum)) -and (-not [string]::IsNullOrEmpty($fileyear))) {
+              move-item -literalpath "$dir" -destination "$basepath\$artist\$fileyear - $filealbum" -Force
+            } else {
+              move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
+            }
           }
         } else {
           write-host "$artist"
@@ -42,4 +49,3 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
     }
   }
 }
-
