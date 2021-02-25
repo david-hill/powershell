@@ -51,8 +51,10 @@ function copy_tag {
 
 #$a = Get-ChildItem d:\soulseek-downloads\complete -recurse | Where-Object {$_.PSIsContainer -eq $True}
 #$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted\Fred Frith" -recurse | Where-Object {$_.PSIsContainer -eq $True}
-$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted\Audiomachine" -recurse | Where-Object {$_.PSIsContainer -eq $True}
+$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted" -recurse | Where-Object {$_.PSIsContainer -eq $True}
+#$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted\Audiomachine" -recurse | Where-Object {$_.PSIsContainer -eq $True}
 #$a = Get-ChildItem n:\mp3 -recurse | Where-Object {$_.PSIsContainer -eq $True}
+#$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted\Elephant Gym" -recurse | Where-Object {$_.PSIsContainer -eq $True}
 
 $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
   if ( $_.FullName -like '*mp3') {
@@ -66,11 +68,20 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
       & 'C:\Program Files (x86)\Lame\lame.exe' $_.FullName $d -b 320
     }
     copy_tag wav $_.FullName
-  } elseif ( $_.FullName -like '*aif') {
+	} elseif ( $_.FullName -like '*aif') {
     $d=$_.FullName -replace "aif$", "wav"
     $e=$_.FullName -replace "aif$", "mp3"
     if (-not (Test-Path -LiteralPath "$e")) {
       & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
+      & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
+      Remove-Item -LiteralPath $d
+    }
+    copy_tag ape $_.FullName
+  } elseif ( $_.FullName -like '*aif') {
+    $d=$_.FullName -replace "aif$", "wav"
+    $e=$_.FullName -replace "aif$", "mp3"
+    if (-not (Test-Path -LiteralPath "$e")) {
+      & "d:\ffmpeg.exe" -i $_.FullName $d
       & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
       Remove-Item -LiteralPath $d
     }
@@ -108,8 +119,12 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
 }
 
 #$a = Get-ChildItem d:\soulseek-downloads\complete -recurse | Where-Object {$_.PSIsContainer -eq $True}
+$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted" -recurse | Where-Object {$_.PSIsContainer -eq $True}
 #$a = Get-ChildItem "H:\MP3\Pre-Sorted\Pietro Antonio Locatelli" -recurse | Where-Object {$_.PSIsContainer -eq $True}
 #$a = Get-ChildItem n:\mp3 -recurse | Where-Object {$_.PSIsContainer -eq $True}
-$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted\Audiomachine" -recurse | Where-Object {$_.PSIsContainer -eq $True}
+#$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted\Audiomachine" -recurse | Where-Object {$_.PSIsContainer -eq $True}
+#$a = Get-ChildItem "D:\soulseek-downloads\Pre-Sorted\Elephant Gym" -recurse | Where-Object {$_.PSIsContainer -eq $True}
 
 $a | Where-Object {$_.GetFiles().Count -eq 0 -and $_.GetDirectories().count -eq 0} | Remove-Item
+
+                                         
