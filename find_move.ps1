@@ -39,7 +39,7 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
             if ( (-not [string]::IsNullOrEmpty($filealbum)) -and (-not [string]::IsNullOrEmpty($fileyear))) {
               move-item -literalpath "$dir" -destination "$basepath\$artist\$fileyear - $filealbum" -Force
             } else {
-              move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
+	      move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
             }
           }
         } else {
@@ -49,3 +49,6 @@ $a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 
     }
   }
 }
+
+$a = Get-ChildItem $basepath -recurse | Where-Object {$_.PSIsContainer -eq $True}
+$a | Where-Object {$_.GetFiles().Count -eq 0 -and $_.GetDirectories().count -eq 0} | Remove-Item
