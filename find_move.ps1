@@ -50,7 +50,8 @@ function findAndMove {
 				}
 			  }
 			} else {
-			  write-host "$artist"
+			  $dir=Split-Path -Path $_.FullName -Parent
+			  write-host "$dir = $artist"
 			}
 		  }
 		}
