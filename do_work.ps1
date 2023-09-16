@@ -123,6 +123,26 @@ function do_work {
 		}
 		copy_tag ape $_.FullName
 		Remove-Item -LiteralPath $_.FullName
+	  } elseif ( $_.FullName -like '*m4a') {
+		$d=$_.FullName -replace "m4a$", "wav"
+		$e=$_.FullName -replace "m4a$", "mp3"
+		if (-not (Test-Path -LiteralPath "$e")) {
+		  & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
+		  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
+		  Remove-Item -LiteralPath $d
+		}
+		copy_tag ape $_.FullName
+		Remove-Item -LiteralPath $_.FullName
+	  } elseif ( $_.FullName -like '*ogg') {
+		$d=$_.FullName -replace "ogg$", "wav"
+		$e=$_.FullName -replace "ogg$", "mp3"
+		if (-not (Test-Path -LiteralPath "$e")) {
+		  & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
+		  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
+		  Remove-Item -LiteralPath $d
+		}
+		copy_tag ape $_.FullName
+		Remove-Item -LiteralPath $_.FullName
 	  } elseif ( $_.FullName -like '*ape') {
 		$d=$_.FullName -replace "ape$", "wav"
 		$e=$_.FullName -replace "ape$", "mp3"
@@ -179,3 +199,5 @@ $a = cleanup
 
 $basepath = "d:\soulseek-downloads\Known"
 $a = cleanup
+
+                              
