@@ -1,9 +1,9 @@
 $taglib = "d:\tools\taglib-sharp.dll"
 [system.reflection.assembly]::loadfile($taglib)
 
-$basepath = "d:\mp3"
-$basepath = "h:\mp3"
 $basepath = "d:\soulseek-downloads\complete"
+$basepath = "h:\mp3"
+$basepath = "d:\mp3"
 
 #$a = Get-ChildItem d:\mp3 -recurse | Where-Object {$_.PSIsContainer -eq $True}
 #$a = Get-ChildItem d:\soulseek-downloads\ -recurse | Where-Object {$_.PSIsContainer -eq $True}
@@ -82,7 +82,7 @@ function do_work {
 
 	$a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
 	  if ( $_.FullName -like '*mp3') {
-	  } elseif ( $_.FullName -like '*m4a' -or $_.FullName -like '*wma' -or $_.FullName -like '*mp2') {
+	  } elseif ( $_.FullName -like '*wma' -or $_.FullName -like '*mp2') {
 	  } elseif ( $_.FullName -like '*cue' ) {
 		 write-host "Split => " $_.FullName
 	  } elseif ( $_.FullName -like '*wav' ) {
@@ -101,7 +101,7 @@ function do_work {
 		  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
 		  Remove-Item -LiteralPath $d
 		}
-		copy_tag ape $_.FullName
+		copy_tag aif $_.FullName
 		Remove-Item -LiteralPath $_.FullName
 	  } elseif ( $_.FullName -like '*aiff') {
 		$d=$_.FullName -replace "aiff$", "wav"
@@ -111,7 +111,7 @@ function do_work {
 		  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
 		  Remove-Item -LiteralPath $d
 		}
-		copy_tag ape $_.FullName
+		copy_tag aiff $_.FullName
 		Remove-Item -LiteralPath $_.FullName
 	  } elseif ( $_.FullName -like '*aac') {
 		$d=$_.FullName -replace "aac$", "wav"
@@ -121,7 +121,7 @@ function do_work {
 		  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
 		  Remove-Item -LiteralPath $d
 		}
-		copy_tag ape $_.FullName
+		copy_tag aac $_.FullName
 		Remove-Item -LiteralPath $_.FullName
 	  } elseif ( $_.FullName -like '*m4a') {
 		$d=$_.FullName -replace "m4a$", "wav"
@@ -131,7 +131,7 @@ function do_work {
 		  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
 		  Remove-Item -LiteralPath $d
 		}
-		copy_tag ape $_.FullName
+		copy_tag m4a $_.FullName
 		Remove-Item -LiteralPath $_.FullName
 	  } elseif ( $_.FullName -like '*ogg') {
 		$d=$_.FullName -replace "ogg$", "wav"
@@ -141,7 +141,7 @@ function do_work {
 		  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
 		  Remove-Item -LiteralPath $d
 		}
-		copy_tag ape $_.FullName
+		copy_tag ogg $_.FullName
 		Remove-Item -LiteralPath $_.FullName
 	  } elseif ( $_.FullName -like '*ape') {
 		$d=$_.FullName -replace "ape$", "wav"
