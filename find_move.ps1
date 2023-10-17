@@ -32,52 +32,63 @@ function find_artist {
   }
 }
 
-
 function findAndMove {
 	$a=$args[0]
+	$total = 0
+	$inc = 0
+	$last = -1
+	$total = ($a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | Measure-Object).Count
+	write-host "`nProcessing $total items`n"
 	$a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
-	if ( $_.FullName -like '*mp3' -or $_.FullName -like '*flac' -or $_.FullName -like '*m4a' -or $_.FullName -like '*wav') {
-		if (Test-Path -LiteralPath $_.FullName)  {
-			$artist=find_artist $_
-			$filename=$_.FullName
-			if (-not ( $artist -eq $False) ) {
-				if ( ( -not ( $artist -match "\&") ) -and ( -not ( $artist -match "\/" ) ) ) {
-					$dir=Split-Path -Path $_.FullName -Parent
-					try {
-						if ( -not ( "$dir" -like "$basepath\$artist\*" ) -and -not ("$dir" -like "$basepath\$artist") ) {
-							write-host "dir" $dir
-							write-host "$basepath\$artist"
-							write-host $artist
-							if (-not(Test-Path -LiteralPath "$basepath\$artist") ) {
-							  New-Item -Path "$basepath" -Name "$artist" -ItemType "directory"
+		if ( $_.FullName -like '*mp3' -or $_.FullName -like '*flac' -or $_.FullName -like '*m4a' -or $_.FullName -like '*wav') {
+			$inc = $inc + 1;
+			$progress = [math]::floor($inc / $total * 100)
+			if ($progress -ne $last) {
+				write-host "`rProgress: $progress %" -nonewline
+				$last = $progress
+			}
+			if (Test-Path -LiteralPath $_.FullName)  {
+				$artist=find_artist $_
+				$filename=$_.FullName
+				if (-not ( $artist -eq $False) ) {
+					if ( ( -not ( $artist -match "\&") ) -and ( -not ( $artist -match "\/" ) ) ) {
+						$dir=Split-Path -Path $_.FullName -Parent
+						try {
+							if ( -not ( "$dir" -like "$basepath\$artist\*" ) -and -not ("$dir" -like "$basepath\$artist") ) {
+								write-host "dir" $dir
+								write-host "$basepath\$artist"
+								write-host $artist
+								if (-not(Test-Path -LiteralPath "$basepath\$artist") ) {
+								  New-Item -Path "$basepath" -Name "$artist" -ItemType "directory"
+								}
+								try {
+									$media = [taglib.file]::create($_.FullName)
+									$filealbum = $media.tag.album
+									$fileyear = $media.tag.year
+									if ( (-not [string]::IsNullOrEmpty($filealbum)) -and (-not [string]::IsNullOrEmpty($fileyear))) {
+									  move-item -literalpath "$dir" -destination "$basepath\$artist\$fileyear - $filealbum" -Force
+									} else {
+										  move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
+									}			  
+								}
+								catch {
+								  "ERROR: $filename"
+								}
 							}
-							try {
-								$media = [taglib.file]::create($_.FullName)
-								$filealbum = $media.tag.album
-								$fileyear = $media.tag.year
-								if ( (-not [string]::IsNullOrEmpty($filealbum)) -and (-not [string]::IsNullOrEmpty($fileyear))) {
-								  move-item -literalpath "$dir" -destination "$basepath\$artist\$fileyear - $filealbum" -Force
-								} else {
-									  move-item -literalpath "$dir" -destination "$basepath\$artist" -Force
-								}			  
-							}
-							catch {
-							  "ERROR: $filename"
-							}
+						} catch {
+							"ERROR: $filename"						
 						}
-					} catch {
-						"ERROR: $filename"						
+					} else {
+					  $dir=Split-Path -Path $_.FullName -Parent
+					  write-host "$dir = $artist"
 					}
-				} else {
-				  $dir=Split-Path -Path $_.FullName -Parent
-				  write-host "$dir = $artist"
 				}
 			}
+		} else {
+			$inc = $inc + 1;
 		}
-	  }
 	}
 }
-
 
 $a=cleanup
 findAndMove $a
