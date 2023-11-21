@@ -1,10 +1,12 @@
 $taglib = "d:\tools\taglib-sharp.dll"
-[system.reflection.assembly]::loadfile($taglib)
+[system.reflection.assembly]::loadfile($taglib) | out-null
 
 $basepath = "d:\soulseek-downloads\Known"
 $basepath = "d:\soulseek-downloads\Sorted"
 $basepath = "d:\mp3"
 $basepath = "h:\mp3"
+$basepath = "H:\MP3\Pre-Sorted\Ryuichi Sakamoto"
+$basepath = "H:\MP3\Pre-Sorted\Yukihiro Takahashi"
 $basepath = "d:\soulseek-downloads\complete"
 
 #$a = Get-ChildItem d:\mp3 -recurse | Where-Object {$_.PSIsContainer -eq $True}
@@ -27,14 +29,16 @@ $basepath = "d:\soulseek-downloads\complete"
 
 function cleanup {
 	$a = $args[0]
-	if (-not $a -eq $null) {
-		write-host "Cleaning up emtpy folders"
+	if ($a -ne $null) {
+		write-host "Cleaning up emtpy folders... " -nonewline
 		$a | Where-Object {$_.GetFiles().Count -eq 0 -and $_.GetDirectories().count -eq 0} | Remove-Item
+		write-host "done.`n" -nonewline
 	}
 }
 function get_list {
-	write-host "`nGetting file list"
+	write-host "`nGetting file list... " -nonewline
 	$a = Get-ChildItem $basepath -recurse | Where-Object {$_.PSIsContainer -eq $True}
+	write-host "done.`n" -nonewline
 	return $a
 }
 
@@ -91,14 +95,17 @@ function do_work {
 	$total = 0
 	$inc = 0
 	$last = -1
-	if (-not $a -eq $null) {	
+	if ($a -ne $null) {
+		write-host "`nCounting objects... " -nonewline
 		$total = ($a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | Measure-Object).Count
+		write-host "done.`n" -nonewline
 		write-host "`nProcessing $total items`n"
 		$a | Where-Object {$_.GetFiles().Count -ne 0 -and $_.GetDirectories().count -eq 0} | get-childitem | ForEach-Object {
 			$inc = $inc + 1;
 			$progress = [math]::floor($inc / $total * 100)
 			if ($progress -ne $last) {
-				write-host "`rProgress: $progress %" -nonewline
+				Write-Progress -Activity "Search in Progress" -Status "$progress% Complete:" -PercentComplete $progress
+				#write-host "`rProgress: $progress %" -nonewline
 				$last = $progress
 			}
 
