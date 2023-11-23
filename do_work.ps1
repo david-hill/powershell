@@ -4,10 +4,16 @@ $taglib = "d:\tools\taglib-sharp.dll"
 $basepath = "d:\soulseek-downloads\Known"
 $basepath = "d:\soulseek-downloads\Sorted"
 $basepath = "d:\mp3"
-$basepath = "h:\mp3"
 $basepath = "H:\MP3\Pre-Sorted\Ryuichi Sakamoto"
 $basepath = "H:\MP3\Pre-Sorted\Yukihiro Takahashi"
+$basepath = "h:\mp3"
 $basepath = "d:\soulseek-downloads\complete"
+
+$delete_original = 1
+
+$ffmpeg_binary = "d:\tools\ffmpeg.exe"
+$flac_binary = "d:\tools\flac.exe"
+$lame_binary = "C:\Program Files (x86)\Lame\lame.exe"
 
 #$a = Get-ChildItem d:\mp3 -recurse | Where-Object {$_.PSIsContainer -eq $True}
 #$a = Get-ChildItem d:\soulseek-downloads\ -recurse | Where-Object {$_.PSIsContainer -eq $True}
@@ -52,7 +58,7 @@ function copy_tag {
       $mediad = [taglib.file]::create($e)
       if (Test-Path -LiteralPath "$f" ) {
         if (-not($fullname -like '*.wav')) {
-          write-host "Deleting $f"
+          write-host "Deleted $f"
           Remove-item -LiteralPath "$f"
         }
       }
@@ -89,6 +95,28 @@ function copy_tag {
     }
   }
 }
+function start_lame_process ($type, $original, $source, $destination, $addarg){
+	write-host "Converting $source to $destination... " -nonewline
+	start-process -FilePath """$lame_binary""" -ArgumentList """$source""","""$destination""","""$addarg""" -WindowStyle Hidden -wait
+	write-host "done."
+	copy_tag $type $original
+	if ($delete_original -eq 1) {
+		Remove-Item -LiteralPath $original
+		write-host "Deleted $original`n"
+	}
+	
+}
+function start_ffmpeg_process ($source, $destination){
+	write-host "Converting $source to $destination... " -nonewline
+	start-process -FilePath """$ffmpeg_binary""" -ArgumentList "-i","""$source""","""$destination""","""$addarg""" -WindowStyle Hidden -wait
+	write-host "done."
+}
+
+function start_flac_process ($source, $destination){
+	write-host "Converting $source to $destination... " -nonewline
+	start-process -FilePath """$flac_binary""" -ArgumentList "-d","""$source""","-F" -WindowStyle Hidden -wait
+	write-host "done."
+}
 
 function do_work {
 	$a = $args[0]
@@ -105,7 +133,6 @@ function do_work {
 			$progress = [math]::floor($inc / $total * 100)
 			if ($progress -ne $last) {
 				Write-Progress -Activity "Search in Progress" -Status "$progress% Complete:" -PercentComplete $progress
-				#write-host "`rProgress: $progress %" -nonewline
 				$last = $progress
 			}
 
@@ -115,112 +142,79 @@ function do_work {
 				write-host "Split => " $_.FullName
 			} elseif ( $_.FullName -like '*wav' ) {
 				$d=$_.FullName -replace "wav$", "mp3"
-				write-host $_.FullName $d
 				if (-Not (Test-Path -LiteralPath $d)) {
-					& 'C:\Program Files (x86)\Lame\lame.exe' $_.FullName $d -b 320
+					start_lame_process "wav" $_.FullName $_.FullName $d "-b 320"
 				}
-				copy_tag wav $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*aif') {
 				$d=$_.FullName -replace "aif$", "wav"
 				$e=$_.FullName -replace "aif$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
-				  & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_ffmpeg_process $_.FullName $d 
+				  start_lame_process "aif" $_.FullName $d $e "-b 320"
 				}
-				copy_tag aif $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*aiff') {
 				$d=$_.FullName -replace "aiff$", "wav"
 				$e=$_.FullName -replace "aiff$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
-				  & "d:\tools\ffmpeg.exe" -i $_.FullName $d
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_ffmpeg_process $_.FullName $d
+				  start_lame_process "aiff" $_.FullName $d $e "-b 320"
 				}
-				copy_tag aiff $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*aac') {
 				$d=$_.FullName -replace "aac$", "wav"
 				$e=$_.FullName -replace "aac$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
-				  & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_ffmpeg_process $_.FullName $d 
+				  start_lame_process "aac" $_.FullName $d $e "-b 320"
 				}
-				copy_tag aac $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*m4a') {
 				$d=$_.FullName -replace "m4a$", "wav"
 				$e=$_.FullName -replace "m4a$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
-				  & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_ffmpeg_process $_.FullName $d 
+				  start_lame_process "m4a" $_.FullName $d $e "-b 320"
 				}
-				copy_tag m4a $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*ogg') {
 				$d=$_.FullName -replace "ogg$", "wav"
 				$e=$_.FullName -replace "ogg$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
-				  & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_ffmpeg_process $_.FullName $d 
+				  start_lame_process "ogg" $_.FullName $d $e "-b 320"
 				}
-				copy_tag ogg $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*ape') {
 				$d=$_.FullName -replace "ape$", "wav"
 				$e=$_.FullName -replace "ape$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
 				  & "C:\Program Files (x86)\Monkey's Audio\MAC.exe" $_.FullName $d -d
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_lame_process "ape" $_.FullName $d $e "-b 320"
 				}
-				copy_tag ape $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*flac' ) {
 				$d=$_.FullName -replace "flac$", "wav"
 				$e=$_.FullName -replace "flac$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
-				  & 'd:\tools\flac.exe' -d $_.FullName -F
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_flac_process $_.FullName $d
+				  start_lame_process "flac" $_.FullName $d $e "-b 320"
 				}
-				copy_tag flac $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*wma') {
 				$d=$_.FullName -replace "wma$", "wav"
 				$e=$_.FullName -replace "wma$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
-				  & "d:\tools\ffmpeg.exe" -i $_.FullName $d 
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_ffmpeg_process $_.FullName $d 
+				  start_lame_process "wma" $_.FullName $d $e "-b 320"
 				}
-				copy_tag wma $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*wv' ) {
 				$d=$_.FullName -replace "wv$", "wav"
 				$e=$_.FullName -replace "wv$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
 				  & 'd:\tools\wvunpack.exe'  --wav $_.FullName $d
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_lame_process "wv" $_.FullName $d $e "-b 320"
 				}
-				copy_tag wv $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*opus' ) {
 				$d=$_.FullName -replace "opus$", "wav"
 				$e=$_.FullName -replace "opus$", "mp3"
 				if (-not (Test-Path -LiteralPath "$e")) {
 				  & 'd:\tools\opusdec.exe' $_.FullName $d
-				  & 'C:\Program Files (x86)\Lame\lame.exe' $d $e -b 320
-				  Remove-Item -LiteralPath $d
+				  start_lame_process "opus" $_.FullName $d $e "-b 320"
 				}
-				copy_tag wv $_.FullName
-				Remove-Item -LiteralPath $_.FullName
 			} elseif ( $_.FullName -like '*rar' ) {
 				$7zoutput = Split-Path $_.FullName -Parent
 				#write-host $7zoutput
